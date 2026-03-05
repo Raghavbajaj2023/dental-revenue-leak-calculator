@@ -1,10 +1,6 @@
 import streamlit as st
 import requests
 
-# --------------------------------
-# CONFIG
-# --------------------------------
-
 WEBHOOK_URL = "https://humanlesslab.app.n8n.cloud/webhook/dental-ai-audit"
 
 st.set_page_config(
@@ -13,19 +9,15 @@ st.set_page_config(
     layout="centered"
 )
 
-# --------------------------------
-# HEADER
-# --------------------------------
-
 st.title("🦷 Dental Revenue Leak Calculator")
 
 st.write(
 "Estimate how much patient revenue your clinic may be losing due to missed calls."
 )
 
-# --------------------------------
-# CLINIC INFO
-# --------------------------------
+# -----------------------------
+# Clinic Information
+# -----------------------------
 
 st.header("Clinic Information")
 
@@ -33,38 +25,42 @@ name = st.text_input("Your Name")
 clinic = st.text_input("Clinic Name")
 email = st.text_input("Email")
 phone = st.text_input("Phone")
-website = st.text_input("Clinic Website (Required)")
+website = st.text_input("Clinic Website")
 
-# --------------------------------
-# CALL DATA
-# --------------------------------
+# -----------------------------
+# Call Data
+# -----------------------------
 
 st.header("Clinic Call Data")
 
 weekly_calls = st.number_input(
-"How many patient calls does your clinic receive per week?",
+"Weekly patient calls",
 min_value=0,
 value=120
 )
 
 missed_percentage = st.slider(
-"What percentage of calls go unanswered?",
+"Missed call percentage",
 0,
 50,
 25
 )
 
 patient_value = st.number_input(
-"Average revenue from a new patient ($)",
+"Average revenue per new patient ($)",
 min_value=0,
 value=1200
 )
 
-# --------------------------------
-# CALCULATE
-# --------------------------------
+# -----------------------------
+# Main Action Button
+# -----------------------------
 
-if st.button("Calculate Revenue Leakage"):
+if st.button("Run AI Revenue Audit"):
+
+    if website == "":
+        st.error("Please enter the clinic website.")
+        st.stop()
 
     missed_calls = weekly_calls * (missed_percentage / 100)
 
@@ -84,66 +80,53 @@ if st.button("Calculate Revenue Leakage"):
     st.metric("Annual Revenue Lost", f"${round(annual_leak):,}")
 
     st.warning(
-        f"Your clinic may be losing about **${round(monthly_leak):,} per month** due to missed calls."
+        f"Your clinic may be losing **${round(monthly_leak):,} per month** due to missed calls."
     )
 
-    # --------------------------------
-    # SEND TO N8N
-    # --------------------------------
+    # -----------------------------
+    # Send Webhook to n8n
+    # -----------------------------
 
-    if st.button("Request Free AI Audit"):
+    payload = {
+        "name": name,
+        "clinic": clinic,
+        "email": email,
+        "phone": phone,
+        "website": website,
+        "weekly_calls": weekly_calls,
+        "missed_percentage": missed_percentage,
+        "patient_value": patient_value,
+        "monthly_leak": monthly_leak
+    }
 
-        if website == "":
-            st.error("Please enter a clinic website before requesting the audit.")
+    try:
+
+        response = requests.post(
+            WEBHOOK_URL,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+            timeout=10
+        )
+
+        st.write("Webhook Status:", response.status_code)
+
+        if response.status_code == 200:
+
+            st.success("Audit request sent successfully!")
+
         else:
 
-            data = {
-                "name": name,
-                "clinic": clinic,
-                "email": email,
-                "phone": phone,
-                "website": website,
-                "weekly_calls": weekly_calls,
-                "missed_percentage": missed_percentage,
-                "patient_value": patient_value,
-                "monthly_leak": monthly_leak
-            }
+            st.error("Webhook request failed.")
 
-            try:
+    except Exception as e:
 
-                response = requests.post(
-                    WEBHOOK_URL,
-                    json=data,
-                    headers={"Content-Type": "application/json"},
-                    timeout=10
-                )
+        st.error("Error sending webhook")
+        st.write(e)
 
-                st.write("Webhook Status:", response.status_code)
-                st.write("Webhook Response:", response.text)
-
-                if response.status_code == 200:
-
-                    st.success(
-                        "Your AI audit request has been sent successfully."
-                    )
-
-                else:
-
-                    st.error("Webhook request failed.")
-
-            except Exception as e:
-
-                st.error("Error sending webhook")
-                st.write(e)
-
-# --------------------------------
-# FOOTER
-# --------------------------------
+# -----------------------------
+# Footer
+# -----------------------------
 
 st.markdown("---")
 
 st.write("HumanlessLab — AI Voice Systems for Dental Clinics")
-
-st.write(
-"Helping dental clinics capture every patient opportunity."
-)
