@@ -9,78 +9,82 @@ st.set_page_config(
     layout="centered"
 )
 
-# -----------------------------
-# Custom CSS
-# -----------------------------
+# -------------------------
+# CUSTOM CSS
+# -------------------------
 
 st.markdown("""
 <style>
 
-.main {
-background-color:#f7f9fc;
+body {
+background-color:#0f172a;
 }
 
-h1 {
+.block-container{
+padding-top:2rem;
+padding-bottom:2rem;
+max-width:900px;
+}
+
+.section{
+background:#1e293b;
+padding:35px;
+border-radius:14px;
+margin-bottom:25px;
+box-shadow:0px 15px 40px rgba(0,0,0,0.3);
+}
+
+.result-box{
+background:#1e293b;
+padding:40px;
+border-radius:16px;
 text-align:center;
-color:#0f172a;
-font-weight:700;
+margin-bottom:30px;
 }
 
-h2 {
-color:#0f172a;
+.big-number{
+font-size:48px;
+font-weight:800;
+color:#ef4444;
 }
 
-.stButton>button {
-background-color:#2563eb;
+.stButton>button{
+background:#2563eb;
 color:white;
 border-radius:10px;
 height:50px;
 font-size:18px;
 font-weight:600;
+border:none;
 width:100%;
 }
 
-.stButton>button:hover {
-background-color:#1d4ed8;
-}
-
-.section {
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,0.05);
-margin-bottom:25px;
-}
-
-.metric-card {
-background:white;
-padding:25px;
-border-radius:12px;
-box-shadow:0 8px 20px rgba(0,0,0,0.05);
+.stButton>button:hover{
+background:#1d4ed8;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# HERO SECTION
-# -----------------------------
+# -------------------------
+# HERO
+# -------------------------
 
 st.markdown("""
-<div style='text-align:center;margin-bottom:40px;'>
+<div style='text-align:center;margin-bottom:50px'>
 
-<h1>Dental Revenue Leak Calculator</h1>
+<h1>🦷 Dental Revenue Leak Calculator</h1>
 
-<p style='font-size:20px;color:#475569;'>
-Estimate how much patient revenue your clinic may be losing due to missed calls.
+<p style='font-size:20px;color:#94a3b8'>
+Estimate how much monthly patient revenue your clinic may be losing due to missed calls.
 </p>
 
 </div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
+# -------------------------
 # CLINIC INFO
-# -----------------------------
+# -------------------------
 
 st.markdown("<div class='section'>", unsafe_allow_html=True)
 
@@ -94,9 +98,9 @@ website = st.text_input("Clinic Website (optional)")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
+# -------------------------
 # CALL DATA
-# -----------------------------
+# -------------------------
 
 st.markdown("<div class='section'>", unsafe_allow_html=True)
 
@@ -121,49 +125,53 @@ value=1200
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
+# -------------------------
 # CALCULATE
-# -----------------------------
+# -------------------------
 
 if st.button("Calculate Revenue Leakage"):
 
     missed_calls = weekly_calls * (missed_percentage / 100)
+
     lost_patients = missed_calls * 0.5
 
     weekly_leak = lost_patients * patient_value
+
     monthly_leak = weekly_leak * 4
+
     annual_leak = monthly_leak * 12
 
-    st.markdown("<div class='section'>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class='result-box'>
 
-    st.subheader("Estimated Revenue Leakage")
+    <h2>Estimated Monthly Revenue Loss</h2>
+
+    <div class='big-number'>${round(monthly_leak):,}</div>
+
+    <p style='color:#94a3b8'>
+    Your clinic may be losing significant patient revenue from missed calls.
+    </p>
+
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Missed Calls Per Week", round(missed_calls))
-        st.metric("Lost Patients Per Week", round(lost_patients))
+        st.metric("Missed Calls / Week", round(missed_calls))
+        st.metric("Lost Patients / Week", round(lost_patients))
 
     with col2:
         st.metric("Monthly Lost Revenue", f"${round(monthly_leak):,}")
         st.metric("Annual Lost Revenue", f"${round(annual_leak):,}")
 
-    st.error(
-    f"""
-    Your clinic may be losing **${round(monthly_leak):,} every month**
-    from missed patient calls.
-    """
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # -----------------------------
+    # -------------------------
     # FREE AUDIT CTA
-    # -----------------------------
+    # -------------------------
 
     st.markdown("<div class='section'>", unsafe_allow_html=True)
 
-    st.subheader("Get a Free AI Revenue Leak Audit")
+    st.subheader("Get Your Free AI Revenue Leak Audit")
 
     if st.button("Request Free Audit"):
 
@@ -180,20 +188,22 @@ if st.button("Calculate Revenue Leakage"):
         }
 
         try:
+
             requests.post(WEBHOOK_URL, json=data)
 
             st.success(
-            "Your audit request has been submitted. Our team will send your detailed revenue leak report shortly."
+            "Your audit request has been submitted. We will send your detailed report shortly."
             )
 
         except:
-            st.error("Error submitting audit request.")
+
+            st.error("There was an error submitting the audit request.")
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
-# EDUCATION SECTION
-# -----------------------------
+# -------------------------
+# EDUCATION
+# -------------------------
 
 st.markdown("<div class='section'>", unsafe_allow_html=True)
 
@@ -211,9 +221,9 @@ Many patients simply call the **next clinic listed on Google** instead of leavin
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
-# SOLUTION SECTION
-# -----------------------------
+# -------------------------
+# SOLUTION
+# -------------------------
 
 st.markdown("<div class='section'>", unsafe_allow_html=True)
 
@@ -232,9 +242,9 @@ st.markdown("""
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# -----------------------------
+# -------------------------
 # FOOTER
-# -----------------------------
+# -------------------------
 
 st.markdown("---")
 
