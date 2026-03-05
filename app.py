@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+import time
 
 WEBHOOK_URL = "https://humanlesslab.app.n8n.cloud/webhook/dental-ai-audit"
 
@@ -10,9 +11,9 @@ st.set_page_config(
     layout="centered"
 )
 
-# --------------------------------------------------
-# CSS STYLING
-# --------------------------------------------------
+# ------------------------------------------------
+# PREMIUM CSS
+# ------------------------------------------------
 
 st.markdown("""
 <style>
@@ -41,7 +42,7 @@ margin-bottom:40px;
 }
 
 .big-number{
-font-size:58px;
+font-size:60px;
 font-weight:800;
 color:#ef4444;
 text-align:center;
@@ -66,9 +67,9 @@ background:#1d4ed8;
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------------------------------
-# HERO SECTION
-# --------------------------------------------------
+# ------------------------------------------------
+# HERO
+# ------------------------------------------------
 
 st.markdown("""
 <div class="hero">
@@ -82,9 +83,9 @@ Discover how much patient revenue your clinic may be losing from missed calls.
 </div>
 """, unsafe_allow_html=True)
 
-# --------------------------------------------------
+# ------------------------------------------------
 # CLINIC INFO
-# --------------------------------------------------
+# ------------------------------------------------
 
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
@@ -98,9 +99,9 @@ website = st.text_input("Clinic Website")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --------------------------------------------------
+# ------------------------------------------------
 # CALL DATA
-# --------------------------------------------------
+# ------------------------------------------------
 
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
@@ -125,11 +126,35 @@ value=1200
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --------------------------------------------------
+# ------------------------------------------------
 # CALCULATE BUTTON
-# --------------------------------------------------
+# ------------------------------------------------
 
-if st.button("Calculate Revenue Leakage"):
+if st.button("Analyze Revenue Leakage"):
+
+    # AI analysis animation
+
+    progress = st.progress(0)
+
+    status = st.empty()
+
+    steps = [
+        "Scanning clinic call patterns...",
+        "Analyzing missed call probability...",
+        "Estimating patient revenue impact...",
+        "Generating audit report..."
+    ]
+
+    for i in range(4):
+        status.info(steps[i])
+        progress.progress((i+1)*25)
+        time.sleep(1)
+
+    status.success("Analysis Complete")
+
+    # ------------------------------------------------
+    # CALCULATIONS
+    # ------------------------------------------------
 
     missed_calls = weekly_calls * (missed_percentage / 100)
     lost_patients = missed_calls * 0.5
@@ -138,14 +163,31 @@ if st.button("Calculate Revenue Leakage"):
     monthly_leak = weekly_leak * 4
     annual_leak = monthly_leak * 12
 
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+    # ------------------------------------------------
+    # ANIMATED COUNTER
+    # ------------------------------------------------
 
-    st.markdown(f"""
-    <div class="big-number">${round(monthly_leak):,}</div>
-    <p style="text-align:center;color:#94a3b8">
-    Estimated monthly patient revenue lost from missed calls.
-    </p>
-    """, unsafe_allow_html=True)
+    placeholder = st.empty()
+
+    for x in range(0, int(monthly_leak)+1, max(1,int(monthly_leak/30))):
+
+        placeholder.markdown(f"""
+        <div class="glass-card">
+
+        <h2 style="text-align:center">Estimated Monthly Revenue Loss</h2>
+
+        <div class="big-number">${x:,}</div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        time.sleep(0.03)
+
+    # ------------------------------------------------
+    # METRICS
+    # ------------------------------------------------
+
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -159,7 +201,9 @@ if st.button("Calculate Revenue Leakage"):
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Chart
+    # ------------------------------------------------
+    # CHART
+    # ------------------------------------------------
 
     data = pd.DataFrame({
         "Period":["Weekly","Monthly","Annual"],
@@ -174,7 +218,46 @@ if st.button("Calculate Revenue Leakage"):
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Audit CTA
+    # ------------------------------------------------
+    # AI SUMMARY
+    # ------------------------------------------------
+
+    st.markdown("""
+    <div class="glass-card">
+
+    <h3>AI Revenue Leak Summary</h3>
+
+    • Missed patient calls are likely causing revenue leakage.  
+    • Many patients will contact competing clinics instead.  
+    • High-value treatments like implants or cosmetic dentistry may also be lost.
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ------------------------------------------------
+    # RISK LEVEL
+    # ------------------------------------------------
+
+    risk = "LOW"
+
+    if monthly_leak > 50000:
+        risk = "HIGH"
+    elif monthly_leak > 20000:
+        risk = "MEDIUM"
+
+    st.markdown(f"""
+    <div class="glass-card">
+
+    <h3>Patient Leakage Risk</h3>
+
+    <h1 style="color:#ef4444;text-align:center">{risk}</h1>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ------------------------------------------------
+    # CTA
+    # ------------------------------------------------
 
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
@@ -208,9 +291,9 @@ if st.button("Calculate Revenue Leakage"):
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --------------------------------------------------
-# EDUCATION SECTION
-# --------------------------------------------------
+# ------------------------------------------------
+# EDUCATION
+# ------------------------------------------------
 
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
@@ -228,9 +311,9 @@ Many patients simply call the **next clinic listed on Google** instead of leavin
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --------------------------------------------------
+# ------------------------------------------------
 # SOLUTION
-# --------------------------------------------------
+# ------------------------------------------------
 
 st.markdown('<div class="glass-card">', unsafe_allow_html=True)
 
@@ -249,9 +332,9 @@ st.markdown("""
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# --------------------------------------------------
+# ------------------------------------------------
 # FOOTER
-# --------------------------------------------------
+# ------------------------------------------------
 
 st.markdown("---")
 
