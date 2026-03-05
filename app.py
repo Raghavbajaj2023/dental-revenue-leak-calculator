@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 st.set_page_config(
     page_title="Dental Revenue Leak Calculator",
@@ -7,8 +8,8 @@ st.set_page_config(
 
 st.title("Dental Revenue Leak Calculator")
 
-st.subheader(
-    "Estimate how much monthly patient revenue your clinic may be losing due to missed calls."
+st.markdown(
+"Estimate how much monthly patient revenue your clinic may be losing due to missed calls."
 )
 
 st.divider()
@@ -18,7 +19,7 @@ st.header("Clinic Call Data")
 weekly_calls = st.number_input(
     "How many patient calls does your clinic receive per week?",
     min_value=0,
-    placeholder=120
+    value=120
 )
 
 missed_percentage = st.slider(
@@ -27,15 +28,15 @@ missed_percentage = st.slider(
 )
 
 patient_value = st.number_input(
-    "Average revenue from a new patient",
+    "Average revenue from a new patient ($)",
     min_value=0,
-    placeholder=1200
+    value=1200
 )
 
 implant_value = st.number_input(
-    "Average value of implant / cosmetic cases (optional)",
+    "Average value of implant / cosmetic cases ($)",
     min_value=0,
-    placeholder=4000
+    value=4000
 )
 
 after_hours = st.selectbox(
@@ -57,28 +58,40 @@ if st.button("Calculate Revenue Leakage"):
 
     annual_leak = monthly_leak * 12
 
-    st.success("Estimated Patient Revenue Leakage")
+    st.subheader("Estimated Patient Revenue Leakage")
 
-    st.metric("Missed Calls Per Week", round(missed_calls))
-    st.metric("Lost Patients Per Week", round(lost_patients))
-    st.metric("Estimated Monthly Lost Revenue", f"${round(monthly_leak):,}")
-    st.metric("Estimated Annual Lost Revenue", f"${round(annual_leak):,}")
+    col1,col2 = st.columns(2)
 
-    st.write(
-        f"Based on your inputs, your clinic may be losing approximately **${round(monthly_leak):,} per month** in potential patient revenue due to missed calls and delayed responses."
+    col1.metric("Missed Calls Per Week", round(missed_calls))
+    col2.metric("Lost Patients Per Week", round(lost_patients))
+
+    col1.metric("Monthly Lost Revenue", f"${round(monthly_leak):,}")
+    col2.metric("Annual Lost Revenue", f"${round(annual_leak):,}")
+
+    st.warning(
+        f"Your clinic may be losing **${round(monthly_leak):,} every month** from missed patient calls."
     )
+
+    chart_data = pd.DataFrame({
+        "Period":["Weekly","Monthly","Annual"],
+        "Revenue Loss":[weekly_leak,monthly_leak,annual_leak]
+    })
+
+    st.bar_chart(chart_data.set_index("Period"))
 
 st.divider()
 
-st.header("Why This Happens")
+st.header("Why Clinics Lose This Revenue")
 
 st.write(
 """
-Most dental clinics miss **20–30% of inbound patient calls** during busy hours,
-lunch breaks, or after closing.
+Most dental clinics miss **20–30% of inbound calls** during:
 
-Many of these patients contact the **next clinic listed on Google**
-instead of leaving voicemail.
+• Busy treatment hours  
+• Lunch breaks  
+• After closing  
+
+Many patients immediately call the **next clinic on Google** instead of leaving voicemail.
 """
 )
 
@@ -88,23 +101,24 @@ st.header("How Clinics Eliminate This Revenue Leakage")
 
 st.write(
 """
-HumanlessLab installs **24/7 AI voice systems** that answer every patient call instantly,
-qualify treatment inquiries, and automatically book appointments into your calendar.
+HumanlessLab installs **24/7 AI voice systems** that answer every patient call instantly, qualify treatment inquiries, and automatically book appointments.
 """
 )
 
-st.markdown("""
-• Never miss a patient inquiry again  
+st.markdown(
+"""
+• Never miss a patient inquiry  
 • Automatically recover missed calls  
 • Capture after-hours patients  
 • Increase booked appointments without more marketing
-""")
+"""
+)
 
 st.divider()
 
 st.header("Get a Free Revenue Leak Audit")
 
-with st.form("audit_form"):
+with st.form("lead_form"):
 
     name = st.text_input("Name")
     clinic = st.text_input("Clinic Name")
@@ -113,11 +127,11 @@ with st.form("audit_form"):
     website = st.text_input("Website")
     volume = st.text_input("Monthly Patient Volume")
 
-    submit = st.form_submit_button("Submit")
+    submitted = st.form_submit_button("Request Free Audit")
 
-    if submit:
+    if submitted:
         st.success(
-            "Thank you. Our team will review your clinic's patient call flow and send you a detailed revenue leak analysis."
+        "Thank you. Our team will review your clinic's call flow and send a detailed revenue leak analysis."
         )
 
 st.divider()
